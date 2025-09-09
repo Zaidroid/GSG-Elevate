@@ -1,0 +1,1117 @@
+# Market Access Management System
+## Product Requirements Document (PRD)
+
+### Version: 1.0
+### Date: September 2025
+### Document Owner: Team Lead
+
+---
+
+## 1. Executive Summary
+
+The Market Access Management System is a comprehensive web application designed to streamline and manage market access initiatives for partner companies. The system provides centralized management of company profiles, legal support workflows, document management through Google Drive integration, and analytics through Google Sheets integration.
+
+### 1.1 Product Vision
+To create a unified platform that enables efficient management of market access interventions, legal support processes, and company development initiatives while maintaining security and confidentiality of sensitive business information.
+
+### 1.2 Success Metrics
+- Reduce administrative overhead by 40%
+- Improve legal support task completion rate to 95%
+- Increase visibility into company progress and intervention effectiveness
+- Achieve 100% document traceability and version control
+
+---
+
+## 2. Product Overview
+
+### 2.1 Target Users
+- **Program Officers**: Primary users managing company relationships and interventions
+- **Legal Advisors**: Legal firm representatives providing support services
+- **Company Points of Contact (POCs)**: Representatives from partner companies
+- **System Administrators**: Technical and administrative oversight
+
+### 2.2 Key Value Propositions
+- Centralized company profile management with intervention tracking
+- Streamlined legal support workflow management
+- Integrated document management with Google Drive
+- Real-time progress tracking and reporting
+- Role-based access control ensuring data confidentiality
+
+---
+
+## 3. Functional Requirements
+
+### 3.1 Company Profiles & Needs Assessment Module
+
+#### 3.1.1 Company Overview Management
+**Priority: High**
+
+**Features:**
+- Create and maintain detailed company profiles including:
+  - Company name, sector classification, and business description
+  - Current markets and target market expansion plans
+  - Team size and organizational structure
+  - International registration status by country
+  - Contact information and key personnel details
+
+**Acceptance Criteria:**
+- Users can create new company profiles with all required fields
+- System validates required information before saving
+- Profiles display current registration status for target markets (Jordan, Oman, UAE, KSA, USA)
+- Search and filter functionality for company discovery
+
+#### 3.1.2 Prioritized Needs Assessment
+**Priority: High**
+
+**Features:**
+- Capture and rank business needs for each company
+- Track market access strategies and priorities
+- Document market registration requirements
+- Link needs to available interventions
+
+**Acceptance Criteria:**
+- Needs can be added, edited, and prioritized using drag-and-drop interface
+- Each need includes description, priority level, target completion date
+- System maintains history of needs changes
+- Needs can be filtered by status, priority, or category
+
+#### 3.1.3 Intervention Allocation Management
+**Priority: High**
+
+**Features:**
+- Allocate Market Access interventions to companies:
+  - Legal Support services
+  - C-Suite Coaching programs
+  - Conference participation
+  - Networking opportunities
+  - Training programs
+
+**Acceptance Criteria:**
+- Visual allocation interface showing intervention-to-company mapping
+- Intervention capacity tracking and availability status
+- Automatic conflict detection for overlapping interventions
+- Progress tracking for each allocated intervention
+
+### 3.2 Legal Support Management & Workflow Module
+
+#### 3.2.1 Legal Needs Tracking System
+**Priority: Critical**
+
+**Features:**
+- Track specific legal requirements across categories:
+  - **Company Registration**: Multi-country registration workflows
+  - **Contract Management**: Client contracts, employee agreements, NDAs, service agreements
+  - **Intellectual Property**: IP registration, trademark applications
+  - **HR Legal Frameworks**: Internal policies, codes of conduct, grievance procedures
+  - **Digital Policies**: Privacy policies, terms of use, website compliance
+  - **Regulatory Compliance**: Country-specific regulation adherence
+
+**Acceptance Criteria:**
+- Categorized legal needs with standardized templates
+- Custom fields for country-specific requirements
+- Bulk import capability for common legal needs
+- Integration with legal assessment reports
+
+#### 3.2.2 Status & Progress Tracking
+**Priority: Critical**
+
+**Features:**
+- Real-time status tracking for all legal tasks
+- Workflow stages: Initiated → In Progress → Review → Completed
+- Custom status messages (e.g., "Kurdi guidelines sent", "registration in progress")
+- Progress percentage calculation and visualization
+
+**Acceptance Criteria:**
+- Status updates are timestamp and user-attributed
+- Visual progress indicators (progress bars, status badges)
+- Automated status change notifications
+- Historical status tracking with change logs
+
+#### 3.2.3 Assessment Reports & Roadmaps
+**Priority: High**
+
+**Features:**
+- Store and manage legal needs assessment reports
+- Create and maintain legal compliance roadmaps
+- Link roadmaps to specific legal tasks and milestones
+- Generate progress reports against roadmaps
+
+**Acceptance Criteria:**
+- Report upload and categorization system
+- Roadmap milestone tracking with target dates
+- Visual timeline representation of legal workflows
+- Export capabilities for external reporting
+
+### 3.3 Document Management & Google Drive Integration
+
+#### 3.3.1 Centralized Document Repository
+**Priority: Critical**
+
+**Features:**
+- Deep integration with Google Drive API
+- Automated folder structure creation per company
+- Document categorization and tagging system
+- Advanced search across document content
+
+**Acceptance Criteria:**
+- One-click access to company-specific Google Drive folders
+- Document metadata synchronization with Drive
+- Full-text search capability across linked documents
+- Automatic folder creation for new companies
+
+#### 3.3.2 Document Status Management
+**Priority: High**
+
+**Features:**
+- Document lifecycle tracking: Draft → Review → Approved → Signed
+- Digital signature status integration
+- Version control with Google Drive native features
+- Document approval workflows
+
+**Acceptance Criteria:**
+- Visual status indicators for all documents
+- Email notifications for status changes
+- Approval workflow configuration per document type
+- Integration with Google Drive sharing permissions
+
+#### 3.3.3 Version Control & History
+**Priority: Medium**
+
+**Features:**
+- Leverage Google Drive's native version control
+- Version comparison interface
+- Change attribution and timestamps
+- Rollback capabilities for critical documents
+
+**Acceptance Criteria:**
+- Version history accessible from within the application
+- Side-by-side version comparison
+- User-friendly rollback interface
+- Version change notifications
+
+### 3.4 Communication & Follow-up Module
+
+#### 3.4.1 Task Assignment System
+**Priority: High**
+
+**Features:**
+- Assign legal support tasks to team members
+- Task priority and deadline management
+- Workload balancing across team members
+- Task dependency tracking
+
+**Acceptance Criteria:**
+- Drag-and-drop task assignment interface
+- Email notifications for new assignments
+- Workload visualization per team member
+- Dependent task automatic scheduling
+
+#### 3.4.2 Activity Logging
+**Priority: High**
+
+**Features:**
+- Comprehensive activity feed for each company
+- Consultation session records
+- Follow-up action items tracking
+- Communication history preservation
+
+**Acceptance Criteria:**
+- Chronological activity timeline per company
+- Searchable activity logs
+- Activity categorization and filtering
+- Export capabilities for reporting
+
+#### 3.4.3 Reminders & Notifications
+**Priority: Medium**
+
+**Features:**
+- Automated deadline reminders
+- Document submission alerts
+- Next step notifications
+- Customizable notification preferences
+
+**Acceptance Criteria:**
+- Email and in-app notification system
+- User-configurable notification preferences
+- Escalation rules for overdue items
+- Digest notification options
+
+#### 3.4.4 Meeting Management
+**Priority: Medium**
+
+**Features:**
+- Meeting scheduling integration
+- Meeting notes capture and storage
+- Action item extraction from notes
+- Follow-up task creation from meetings
+
+**Acceptance Criteria:**
+- Calendar integration for meeting scheduling
+- Rich text editor for meeting notes
+- Automatic action item detection and assignment
+- Meeting notes linked to company profiles
+
+#### 3.4.5 Connectivity Considerations
+**Priority: High**
+
+**Features:**
+- Offline capability for basic functions
+- Bandwidth optimization for slow connections
+- Graceful degradation for limited internet
+- Mobile-responsive design for accessibility
+
+**Acceptance Criteria:**
+- Core functions available offline with sync capability
+- Compressed data transfer options
+- Progressive loading for large datasets
+- Mobile-first responsive design
+
+### 3.5 Reporting & Analytics (Google Sheets Integration)
+
+#### 3.5.1 Dashboard & Visualization
+**Priority: High**
+
+**Features:**
+- Executive dashboard with key metrics
+- Real-time progress visualization
+- Intervention effectiveness analytics
+- Company performance comparisons
+
+**Acceptance Criteria:**
+- Interactive dashboard with drill-down capabilities
+- Real-time data refresh from Google Sheets
+- Customizable widget configuration
+- Export capabilities for presentations
+
+#### 3.5.2 Impact Analysis
+**Priority: High**
+
+**Features:**
+- Revenue correlation analysis
+- Market access confidence metrics
+- Intervention ROI calculations
+- Trend analysis over time
+
+**Acceptance Criteria:**
+- Automated data collection from Google Sheets
+- Statistical analysis and correlation reporting
+- Visual trend representations
+- Benchmarking against program goals
+
+#### 3.5.3 Survey Data Integration
+**Priority: Medium**
+
+**Features:**
+- Baseline and endline survey data import
+- Survey response analysis and visualization
+- Progress measurement against baseline metrics
+- Survey data correlation with interventions
+
+**Acceptance Criteria:**
+- Automated survey data sync from Google Sheets
+- Comparative analysis between baseline and endline
+- Survey response rate tracking
+- Integration with company profiles
+
+### 3.6 User Management & Access Control
+
+#### 3.6.1 Role-Based Permissions
+**Priority: Critical**
+
+**Features:**
+- Hierarchical user role system:
+  - **System Administrator**: Full system access
+  - **Program Officer**: Company management and intervention oversight
+  - **Legal Advisor**: Legal task management and document access
+  - **Company POC**: Limited access to own company data
+- Granular permission controls per module
+- Dynamic permission assignment based on company relationships
+
+**Acceptance Criteria:**
+- Role-based menu and feature visibility
+- Company-specific access controls
+- Audit logging for permission changes
+- Self-service user profile management
+
+#### 3.6.2 Data Confidentiality & Security
+**Priority: Critical**
+
+**Features:**
+- End-to-end encryption for sensitive data
+- Secure authentication with multi-factor support
+- Data classification and handling protocols
+- Privacy compliance (GDPR considerations)
+
+**Acceptance Criteria:**
+- All sensitive data encrypted at rest and in transit
+- MFA enforcement for privileged accounts
+- Data access logging and monitoring
+- Privacy policy compliance and user consent
+
+---
+
+## 4. Technical Requirements
+
+### 4.1 Architecture Requirements
+- **Frontend**: Modern web framework (React/Vue.js/Angular) with responsive design
+- **Backend**: RESTful API architecture with microservices consideration
+- **Database**: Scalable database solution (PostgreSQL/MongoDB)
+- **Integration**: Google Drive API v3, Google Sheets API v4
+- **Authentication**: OAuth 2.0 with Google Workspace integration
+- **Hosting**: Cloud-native deployment (AWS/GCP/Azure)
+
+### 4.2 Performance Requirements
+- Page load times under 3 seconds on standard connections
+- Support for 100+ concurrent users
+- 99.5% uptime availability
+- Real-time data synchronization with Google services
+- Mobile responsiveness across devices
+
+### 4.3 Security Requirements
+- HTTPS encryption for all communications
+- Regular security audits and penetration testing
+- Backup and disaster recovery procedures
+- Compliance with international data protection standards
+
+---
+
+## 5. Integration Specifications
+
+### 5.1 Google Drive Integration
+- **Authentication**: OAuth 2.0 flow with Google Workspace
+- **Folder Management**: Automated folder creation and permission setting
+- **File Operations**: Upload, download, share, and version management
+- **Real-time Sync**: Webhook integration for real-time updates
+
+### 5.2 Google Sheets Integration
+- **Data Import**: Automated data sync from designated sheets
+- **Analytics**: Real-time data processing for dashboard metrics
+- **Export**: Data export to sheets for external analysis
+- **Templates**: Standardized sheet templates for consistent data structure
+
+---
+
+## 6. User Experience Requirements
+
+### 6.1 Interface Design
+- Clean, intuitive interface following modern UX principles
+- Consistent design system with reusable components
+- Accessibility compliance (WCAG 2.1 AA standards)
+- Multi-language support consideration for Arabic/English
+
+### 6.2 Workflow Optimization
+- Minimal clicks for common tasks
+- Bulk operations for efficiency
+- Smart defaults and auto-completion
+- Contextual help and onboarding
+
+---
+
+## 7. Implementation Roadmap
+
+### Phase 1 (Months 1-2): Foundation
+- User management and authentication
+- Basic company profile management
+- Google Drive integration setup
+- Core navigation and dashboard framework
+
+### Phase 2 (Months 3-4): Legal Management
+- Legal needs tracking system
+- Document management integration
+- Task assignment and workflow
+- Status tracking and notifications
+
+### Phase 3 (Months 5-6): Analytics & Optimization
+- Google Sheets integration
+- Reporting dashboard
+- Advanced analytics features
+- Mobile optimization
+
+### Phase 4 (Months 7-8): Enhancement & Launch
+- User acceptance testing
+- Performance optimization
+- Security auditing
+- Production deployment and user training
+
+---
+
+## 8. Success Criteria & KPIs
+
+### 8.1 Real-Time Performance Metrics
+- **Sync Latency**: <500ms for all Google service synchronization
+- **UI Response Time**: <100ms for user interactions with smooth animations
+- **Connection Reliability**: 99.9% WebSocket uptime with automatic reconnection
+- **Data Consistency**: 100% accuracy between app and Google services
+- **Animation Performance**: 60fps smooth animations across all devices
+
+### 8.2 Design System Compliance
+- **Gaza Sky Geeks Visual Consistency**: 100% adherence to inspired design patterns
+- **Responsive Design**: Perfect functionality across all device sizes
+- **Animation Quality**: Smooth, meaningful animations that enhance user experience
+- **Loading Performance**: <2s initial load time with skeleton screens for longer operations
+
+### 8.3 AI-Copilot Development Success
+- **Rapid Implementation**: All core features functional within development session
+- **Code Quality**: TypeScript strict mode compliance for AI understanding
+- **Component Reusability**: 80% of UI built from reusable components
+- **Real-time Features**: Bidirectional sync working immediately upon deployment
+
+---
+
+## 9. Risk Assessment & Mitigation
+
+### 9.1 Technical Risks
+- **Google API limitations**: Implement fallback mechanisms and rate limiting
+- **Data synchronization issues**: Build robust error handling and retry logic
+- **Performance bottlenecks**: Implement caching and optimization strategies
+
+### 9.2 Business Risks
+- **User adoption resistance**: Comprehensive training and change management
+- **Data migration complexity**: Phased migration with extensive testing
+- **Security vulnerabilities**: Regular security audits and updates
+
+---
+
+## 10. Database Schema
+
+### 10.1 Firebase Firestore Collections Structure
+
+#### **Companies Collection** `/companies/{companyId}`
+```typescript
+interface Company {
+  id: string;
+  name: string;
+  sector: string;
+  description: string;
+  teamSize: number;
+  foundedYear: number;
+  website?: string;
+  
+  // Contact Information
+  primaryContact: {
+    name: string;
+    email: string;
+    phone?: string;
+    position: string;
+  };
+  
+  // Market Information
+  currentMarkets: string[]; // ["Palestine", "Jordan"]
+  targetMarkets: string[]; // ["UAE", "KSA", "USA"]
+  
+  // Registration Status
+  registrations: {
+    [country: string]: {
+      status: 'not_started' | 'in_progress' | 'completed' | 'rejected';
+      startDate?: Timestamp;
+      completedDate?: Timestamp;
+      notes?: string;
+      documents?: string[]; // Google Drive file IDs
+    };
+  };
+  
+  // Google Integration
+  googleDriveFolderId: string;
+  googleSheetId?: string;
+  
+  // Metadata
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  createdBy: string; // User ID
+  lastModifiedBy: string;
+  
+  // Real-time sync
+  syncStatus: 'synced' | 'syncing' | 'error';
+  lastSyncAt: Timestamp;
+}
+```
+
+#### **Interventions Collection** `/interventions/{interventionId}`
+```typescript
+interface Intervention {
+  id: string;
+  type: 'legal_support' | 'c_suite_coaching' | 'conference' | 'networking' | 'training';
+  name: string;
+  description: string;
+  
+  // Allocation
+  companyId: string;
+  allocatedAt: Timestamp;
+  allocatedBy: string; // User ID
+  
+  // Status & Progress
+  status: 'allocated' | 'in_progress' | 'completed' | 'cancelled';
+  progress: number; // 0-100
+  startDate: Timestamp;
+  endDate?: Timestamp;
+  expectedCompletionDate: Timestamp;
+  
+  // Assignment
+  assignedTo: string[]; // User IDs
+  primaryAssignee: string; // User ID
+  
+  // Tracking
+  milestones: {
+    id: string;
+    title: string;
+    description?: string;
+    dueDate: Timestamp;
+    status: 'pending' | 'in_progress' | 'completed';
+    completedAt?: Timestamp;
+    completedBy?: string;
+  }[];
+  
+  // Google Integration
+  relatedDocuments: string[]; // Google Drive file IDs
+  trackingSheetId?: string;
+  
+  // Metadata
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  lastModifiedBy: string;
+  
+  // Real-time sync
+  syncStatus: 'synced' | 'syncing' | 'error';
+  lastSyncAt: Timestamp;
+}
+```
+
+#### **Legal Needs Collection** `/legalNeeds/{legalNeedId}`
+```typescript
+interface LegalNeed {
+  id: string;
+  companyId: string;
+  
+  // Categorization
+  category: 'company_registration' | 'contract_management' | 'ip_protection' | 
+            'hr_frameworks' | 'digital_policies' | 'regulatory_compliance';
+  subcategory?: string;
+  
+  // Details
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  urgency: 'low' | 'medium' | 'high';
+  
+  // Specific Requirements
+  targetCountries?: string[]; // For registration needs
+  contractType?: string; // For contract needs
+  regulationType?: string; // For compliance needs
+  
+  // Status & Progress
+  status: 'identified' | 'in_progress' | 'review' | 'completed' | 'on_hold';
+  progress: number; // 0-100
+  
+  // Assignment
+  assignedTo: string[]; // User IDs (legal advisors)
+  assignedBy: string; // User ID
+  assignedAt: Timestamp;
+  
+  // Timeline
+  identifiedAt: Timestamp;
+  expectedCompletionDate: Timestamp;
+  actualCompletionDate?: Timestamp;
+  
+  // Legal Assessment
+  assessmentReportId?: string; // Document ID
+  roadmapId?: string; // Document ID
+  complexity: 'simple' | 'moderate' | 'complex';
+  estimatedHours?: number;
+  
+  // Documents & Communication
+  relatedDocuments: string[]; // Google Drive file IDs
+  statusUpdates: {
+    id: string;
+    message: string;
+    status: string;
+    updatedBy: string;
+    updatedAt: Timestamp;
+    isPublic: boolean; // Visible to company POC
+  }[];
+  
+  // Google Integration
+  trackingSheetRowId?: number;
+  
+  // Metadata
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  lastModifiedBy: string;
+  
+  // Real-time sync
+  syncStatus: 'synced' | 'syncing' | 'error';
+  lastSyncAt: Timestamp;
+}
+```
+
+#### **Documents Collection** `/documents/{documentId}`
+```typescript
+interface Document {
+  id: string;
+  
+  // Google Drive Integration
+  googleDriveFileId: string;
+  googleDriveParentFolderId: string;
+  driveUrl: string;
+  
+  // Document Info
+  name: string;
+  type: 'contract' | 'agreement' | 'policy' | 'certificate' | 'report' | 
+        'assessment' | 'template' | 'other';
+  mimeType: string;
+  size: number; // bytes
+  
+  // Relationships
+  companyId: string;
+  legalNeedId?: string;
+  interventionId?: string;
+  
+  // Status & Workflow
+  status: 'draft' | 'review' | 'approved' | 'signed' | 'expired';
+  version: string;
+  isTemplate: boolean;
+  
+  // Permissions & Access
+  accessLevel: 'private' | 'company' | 'team' | 'public';
+  sharedWith: string[]; // User IDs
+  
+  // Workflow
+  approvalWorkflow?: {
+    steps: {
+      stepId: string;
+      approverUserId: string;
+      status: 'pending' | 'approved' | 'rejected';
+      approvedAt?: Timestamp;
+      comments?: string;
+    }[];
+    currentStep: number;
+  };
+  
+  // Digital Signature
+  signatureStatus?: 'not_required' | 'pending' | 'signed';
+  signedBy?: {
+    userId: string;
+    signedAt: Timestamp;
+    ipAddress: string;
+  }[];
+  
+  // Version Control
+  versionHistory: {
+    version: string;
+    googleDriveRevisionId: string;
+    modifiedAt: Timestamp;
+    modifiedBy: string;
+    changes: string;
+  }[];
+  
+  // Metadata
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  createdBy: string;
+  lastModifiedBy: string;
+  
+  // Real-time sync
+  syncStatus: 'synced' | 'syncing' | 'error';
+  lastSyncAt: Timestamp;
+  driveLastModified: Timestamp;
+}
+```
+
+#### **Tasks Collection** `/tasks/{taskId}`
+```typescript
+interface Task {
+  id: string;
+  
+  // Task Details
+  title: string;
+  description?: string;
+  type: 'legal_support' | 'document_review' | 'consultation' | 'follow_up' | 'other';
+  
+  // Relationships
+  companyId: string;
+  legalNeedId?: string;
+  interventionId?: string;
+  parentTaskId?: string; // For subtasks
+  
+  // Assignment
+  assignedTo: string; // User ID
+  assignedBy: string; // User ID
+  assignedAt: Timestamp;
+  
+  // Status & Priority
+  status: 'todo' | 'in_progress' | 'review' | 'completed' | 'cancelled';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  
+  // Timeline
+  dueDate: Timestamp;
+  estimatedHours?: number;
+  actualHours?: number;
+  startedAt?: Timestamp;
+  completedAt?: Timestamp;
+  
+  // Progress
+  progress: number; // 0-100
+  checklist?: {
+    id: string;
+    text: string;
+    completed: boolean;
+    completedAt?: Timestamp;
+  }[];
+  
+  // Communication
+  notes: string;
+  comments: {
+    id: string;
+    userId: string;
+    message: string;
+    createdAt: Timestamp;
+    isInternal: boolean; // Not visible to company POC
+  }[];
+  
+  // Dependencies
+  dependsOn: string[]; // Task IDs
+  blocks: string[]; // Task IDs this task blocks
+  
+  // Documents
+  relatedDocuments: string[]; // Document IDs
+  
+  // Reminders & Notifications
+  reminders: {
+    type: 'deadline' | 'follow_up' | 'custom';
+    scheduledFor: Timestamp;
+    sent: boolean;
+    message?: string;
+  }[];
+  
+  // Google Integration
+  googleSheetRowId?: number;
+  
+  // Metadata
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  lastModifiedBy: string;
+  
+  // Real-time sync
+  syncStatus: 'synced' | 'syncing' | 'error';
+  lastSyncAt: Timestamp;
+}
+```
+
+#### **Activities Collection** `/activities/{activityId}`
+```typescript
+interface Activity {
+  id: string;
+  
+  // Activity Details
+  type: 'meeting' | 'consultation' | 'document_upload' | 'status_update' | 
+        'task_assignment' | 'intervention_allocated' | 'system_action';
+  action: string; // Human readable action
+  description?: string;
+  
+  // Relationships
+  userId: string; // Who performed the action
+  companyId: string;
+  entityType?: 'task' | 'legal_need' | 'intervention' | 'document';
+  entityId?: string;
+  
+  // Meeting Specific (if type === 'meeting')
+  meeting?: {
+    duration: number; // minutes
+    attendees: string[]; // User IDs
+    meetingType: 'in_person' | 'video_call' | 'phone';
+    notes?: string;
+    actionItems: {
+      id: string;
+      description: string;
+      assignedTo: string;
+      dueDate?: Timestamp;
+      completed: boolean;
+    }[];
+  };
+  
+  // Changes Tracking
+  changes?: {
+    field: string;
+    oldValue: any;
+    newValue: any;
+  }[];
+  
+  // System Context
+  ipAddress?: string;
+  userAgent?: string;
+  source: 'web_app' | 'google_sheets' | 'google_drive' | 'system';
+  
+  // Visibility
+  isInternal: boolean; // Not visible to company POCs
+  
+  // Metadata
+  createdAt: Timestamp;
+  
+  // Real-time sync
+  syncStatus: 'synced' | 'syncing' | 'error';
+}
+```
+
+#### **Users Collection** `/users/{userId}`
+```typescript
+interface User {
+  id: string; // Google OAuth user ID
+  
+  // Basic Info
+  email: string;
+  name: string;
+  profilePictureUrl?: string;
+  phone?: string;
+  
+  // Role & Permissions
+  role: 'system_admin' | 'program_officer' | 'legal_advisor' | 'company_poc';
+  permissions: {
+    companies: {
+      [companyId: string]: 'read' | 'write' | 'admin';
+    };
+    system: {
+      manageUsers: boolean;
+      manageSettings: boolean;
+      viewAllCompanies: boolean;
+      exportData: boolean;
+    };
+  };
+  
+  // Company Association (for company POCs)
+  companyId?: string;
+  
+  // Preferences
+  preferences: {
+    notifications: {
+      email: boolean;
+      inApp: boolean;
+      reminders: boolean;
+    };
+    language: 'en' | 'ar';
+    timezone: string;
+  };
+  
+  // Google Integration
+  googleTokens: {
+    accessToken: string;
+    refreshToken: string;
+    expiryDate: Timestamp;
+    scope: string[];
+  };
+  
+  // Activity
+  lastLoginAt: Timestamp;
+  lastActiveAt: Timestamp;
+  isOnline: boolean; // For real-time features
+  
+  // Metadata
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  
+  // Real-time sync
+  syncStatus: 'synced' | 'syncing' | 'error';
+}
+```
+
+#### **Notifications Collection** `/notifications/{notificationId}`
+```typescript
+interface Notification {
+  id: string;
+  
+  // Target
+  userId: string;
+  
+  // Content
+  title: string;
+  message: string;
+  type: 'task_assigned' | 'deadline_reminder' | 'status_update' | 
+        'document_shared' | 'intervention_update' | 'system_alert';
+  
+  // Related Entities
+  entityType?: 'task' | 'legal_need' | 'intervention' | 'document' | 'company';
+  entityId?: string;
+  companyId?: string;
+  
+  // Status
+  read: boolean;
+  readAt?: Timestamp;
+  
+  // Actions
+  actions?: {
+    label: string;
+    url: string;
+    primary: boolean;
+  }[];
+  
+  // Scheduling
+  scheduledFor?: Timestamp; // For future notifications
+  sent: boolean;
+  
+  // Metadata
+  createdAt: Timestamp;
+}
+```
+
+#### **System Settings Collection** `/settings/config`
+```typescript
+interface SystemSettings {
+  // Google Integration
+  googleDrive: {
+    rootFolderId: string;
+    templateFolderId: string;
+    maxFileSize: number; // bytes
+    allowedFileTypes: string[];
+  };
+  
+  googleSheets: {
+    masterSheetId: string;
+    templateSheetId: string;
+    syncInterval: number; // seconds
+    batchSize: number;
+  };
+  
+  // Legal Categories
+  legalCategories: {
+    [category: string]: {
+      name: string;
+      subcategories: string[];
+      defaultPriority: 'low' | 'medium' | 'high';
+      estimatedHours: number;
+    };
+  };
+  
+  // Countries & Markets
+  supportedCountries: {
+    [code: string]: {
+      name: string;
+      registrationRequirements: string[];
+      averageProcessingTime: number; // days
+    };
+  };
+  
+  // Intervention Types
+  interventionTypes: {
+    [type: string]: {
+      name: string;
+      description: string;
+      defaultDuration: number; // days
+      capacity: number; // max concurrent
+    };
+  };
+  
+  // Notification Settings
+  notifications: {
+    reminderIntervals: number[]; // days before deadline
+    escalationRules: {
+      overdueDays: number;
+      escalateTo: string[]; // User IDs
+    }[];
+  };
+  
+  // System Limits
+  limits: {
+    maxTasksPerCompany: number;
+    maxDocumentsPerCompany: number;
+    sessionTimeout: number; // minutes
+  };
+  
+  // Metadata
+  lastUpdated: Timestamp;
+  updatedBy: string;
+}
+```
+
+### 10.2 Firestore Security Rules
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read/write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Company access based on permissions
+    match /companies/{companyId} {
+      allow read, write: if request.auth != null && 
+        hasCompanyAccess(request.auth.uid, companyId);
+    }
+    
+    // Legal needs inherit company permissions
+    match /legalNeeds/{legalNeedId} {
+      allow read, write: if request.auth != null && 
+        hasCompanyAccess(request.auth.uid, resource.data.companyId);
+    }
+    
+    // Tasks inherit company permissions
+    match /tasks/{taskId} {
+      allow read, write: if request.auth != null && 
+        hasCompanyAccess(request.auth.uid, resource.data.companyId);
+    }
+    
+    // Activities are readable by company members
+    match /activities/{activityId} {
+      allow read: if request.auth != null && 
+        hasCompanyAccess(request.auth.uid, resource.data.companyId);
+      allow create: if request.auth != null;
+    }
+    
+    // Notifications for specific user
+    match /notifications/{notificationId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+    }
+  }
+  
+  function hasCompanyAccess(userId, companyId) {
+    return get(/databases/$(database)/documents/users/$(userId)).data.permissions.companies[companyId] != null;
+  }
+}
+```
+
+### 10.3 Google Sheets Schema Templates
+
+#### **Companies Master Sheet**
+| Column | Type | Description |
+|--------|------|-------------|
+| A: ID | string | Company ID (matches Firestore) |
+| B: Name | string | Company name |
+| C: Sector | string | Business sector |
+| D: Team Size | number | Number of employees |
+| E: Current Markets | string | Comma-separated list |
+| F: Target Markets | string | Comma-separated list |
+| G: Primary Contact | string | Contact person |
+| H: Email | string | Primary email |
+| I: Status | string | Overall status |
+| J: Last Updated | datetime | Sync timestamp |
+
+#### **Legal Needs Tracking Sheet**
+| Column | Type | Description |
+|--------|------|-------------|
+| A: ID | string | Legal need ID |
+| B: Company | string | Company name |
+| C: Category | string | Legal category |
+| D: Title | string | Need title |
+| E: Priority | string | Priority level |
+| F: Status | string | Current status |
+| G: Assigned To | string | Legal advisor |
+| H: Due Date | date | Expected completion |
+| I: Progress % | number | Completion percentage |
+| J: Notes | string | Latest status notes |
+
+## 11. Appendices
+
+### 11.1 Glossary
+- **Market Access**: Strategies and processes for entering new markets
+- **Intervention**: Specific support services provided to companies
+- **POC**: Point of Contact - designated company representative
+- **Legal Needs Assessment**: Comprehensive review of company legal requirements
+
+### 11.2 Referenced Companies
+- Aeliasoft, Foras, Radix, Sada, Ultimits, Iris, Orion
+
+### 11.3 Target Markets
+- Jordan, Oman, UAE, KSA (Saudi Arabia), USA
+
+---
+
+*This PRD serves as the foundational document for the Market Access Management System development project with complete database schema for immediate AI-copilot implementation.*
