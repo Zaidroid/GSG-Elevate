@@ -10,6 +10,7 @@ import LegalSupport from "@/pages/legal-support";
 import Documents from "@/pages/documents";
 import Tasks from "@/pages/tasks";
 import Analytics from "@/pages/analytics";
+import Automation from "@/pages/automation";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -22,6 +23,7 @@ function Router() {
         <Route path="/documents" component={Documents} />
         <Route path="/tasks" component={Tasks} />
         <Route path="/analytics" component={Analytics} />
+        <Route path="/automation" component={Automation} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

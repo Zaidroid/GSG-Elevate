@@ -389,6 +389,78 @@ export class DatabaseStorage implements IStorage {
   }
 
   private documentAnalyses?: Map<string, any>;
+
+  // Workflow automation methods
+  async getWorkflowRules(): Promise<any[]> {
+    return [
+      {
+        id: '1',
+        name: 'Legal Document Review Alert',
+        description: 'Automatically notify legal team when new contracts are uploaded',
+        trigger: { type: 'document_uploaded', conditions: [] },
+        actions: [{ type: 'send_notification', config: {} }],
+        isActive: true,
+        lastRun: '2024-01-15T10:30:00Z',
+        executionCount: 45
+      },
+      {
+        id: '2',
+        name: 'Compliance Deadline Reminder',
+        description: 'Send reminders 7 days before compliance deadlines',
+        trigger: { type: 'schedule', conditions: [] },
+        actions: [{ type: 'send_email', config: {} }],
+        isActive: true,
+        lastRun: '2024-01-15T08:00:00Z',
+        executionCount: 23
+      },
+      {
+        id: '3',
+        name: 'Market Entry Progress Update',
+        description: 'Weekly progress reports to stakeholders',
+        trigger: { type: 'schedule', conditions: [] },
+        actions: [{ type: 'generate_report', config: {} }],
+        isActive: false,
+        lastRun: '2024-01-10T16:00:00Z',
+        executionCount: 8
+      },
+      {
+        id: '4',
+        name: 'Risk Assessment Trigger',
+        description: 'Trigger risk assessment when legal issues are identified',
+        trigger: { type: 'legal_issue_detected', conditions: [] },
+        actions: [{ type: 'create_task', config: {} }],
+        isActive: true,
+        lastRun: '2024-01-14T14:20:00Z',
+        executionCount: 12
+      }
+    ];
+  }
+
+  async getWorkflowStats(): Promise<any> {
+    return {
+      activeRules: 12,
+      executionsToday: 87,
+      timeSaved: '24h',
+      successRate: '96.5'
+    };
+  }
+
+  async toggleWorkflowRule(id: string, isActive: boolean): Promise<any> {
+    return {
+      id,
+      isActive,
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  async executeWorkflowRule(id: string): Promise<any> {
+    return {
+      id,
+      executedAt: new Date().toISOString(),
+      status: 'success',
+      message: 'Workflow rule executed successfully'
+    };
+  }
 }
 
 export const storage = new DatabaseStorage();

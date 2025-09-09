@@ -466,6 +466,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Workflow Automation endpoints
+  app.get("/api/workflow/rules", async (req, res) => {
+    try {
+      const rules = await storage.getWorkflowRules();
+      res.json(rules);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch workflow rules" });
+    }
+  });
+
+  app.get("/api/workflow/stats", async (req, res) => {
+    try {
+      const stats = await storage.getWorkflowStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch workflow stats" });
+    }
+  });
+
+  app.post("/api/workflow/rules/:id/toggle", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isActive } = req.body;
+      
+      const result = await storage.toggleWorkflowRule(id, isActive);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to toggle workflow rule" });
+    }
+  });
+
+  app.post("/api/workflow/rules/:id/execute", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const result = await storage.executeWorkflowRule(id);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to execute workflow rule" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

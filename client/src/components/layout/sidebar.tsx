@@ -9,7 +9,8 @@ import {
   BarChart3, 
   TrendingUp, 
   Users, 
-  Settings 
+  Settings,
+  Zap 
 } from "lucide-react";
 
 const mainMenuItems = [
@@ -22,7 +23,7 @@ const mainMenuItems = [
 
 const analyticsItems = [
   { path: "/analytics", label: "Advanced Analytics", icon: BarChart3 },
-  { path: "/reports", label: "Reports", icon: TrendingUp },
+  { path: "/automation", label: "Workflow Automation", icon: Zap },
 ];
 
 const adminItems = [
