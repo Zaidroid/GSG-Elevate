@@ -11,6 +11,8 @@ import Documents from "@/pages/documents";
 import Tasks from "@/pages/tasks";
 import Analytics from "@/pages/analytics";
 import Automation from "@/pages/automation";
+import Settings from "@/pages/settings";
+import UserManagement from "@/pages/user-management";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +26,8 @@ function Router() {
         <Route path="/tasks" component={Tasks} />
         <Route path="/analytics" component={Analytics} />
         <Route path="/automation" component={Automation} />
+        <Route path="/settings" component={Settings} />
+        <Route path="/users" component={UserManagement} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
