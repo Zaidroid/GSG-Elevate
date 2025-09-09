@@ -305,6 +305,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Advanced Analytics endpoints
+  app.get("/api/analytics/market-penetration", async (req, res) => {
+    try {
+      const analytics = await storage.getMarketPenetrationAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch market analytics" });
+    }
+  });
+
+  app.get("/api/analytics/progress-tracking", async (req, res) => {
+    try {
+      const analytics = await storage.getProgressTrackingAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch progress analytics" });
+    }
+  });
+
+  app.get("/api/analytics/revenue-impact", async (req, res) => {
+    try {
+      const analytics = await storage.getRevenueImpactAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch revenue analytics" });
+    }
+  });
+
+  app.get("/api/analytics/performance-metrics", async (req, res) => {
+    try {
+      const analytics = await storage.getPerformanceMetrics();
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch performance metrics" });
+    }
+  });
+
+  app.get("/api/analytics/compliance-status", async (req, res) => {
+    try {
+      const analytics = await storage.getComplianceAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch compliance analytics" });
+    }
+  });
+
+  app.post("/api/analytics/export/:type", async (req, res) => {
+    try {
+      const { type } = req.params;
+      const reportData = await storage.generateAnalyticsReport(type);
+      
+      // In a real implementation, you would generate a PDF here
+      // For now, we'll return JSON data
+      res.json({ 
+        message: `${type} report generated successfully`,
+        data: reportData,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate report" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

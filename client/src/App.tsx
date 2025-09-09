@@ -9,6 +9,7 @@ import Companies from "@/pages/companies";
 import LegalSupport from "@/pages/legal-support";
 import Documents from "@/pages/documents";
 import Tasks from "@/pages/tasks";
+import Analytics from "@/pages/analytics";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
         <Route path="/legal-support" component={LegalSupport} />
         <Route path="/documents" component={Documents} />
         <Route path="/tasks" component={Tasks} />
+        <Route path="/analytics" component={Analytics} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

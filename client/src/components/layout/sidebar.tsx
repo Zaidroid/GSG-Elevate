@@ -21,8 +21,8 @@ const mainMenuItems = [
 ];
 
 const analyticsItems = [
-  { path: "/reports", label: "Reports", icon: BarChart3 },
-  { path: "/impact-analysis", label: "Impact Analysis", icon: TrendingUp },
+  { path: "/analytics", label: "Advanced Analytics", icon: BarChart3 },
+  { path: "/reports", label: "Reports", icon: TrendingUp },
 ];
 
 const adminItems = [
@@ -41,9 +41,9 @@ function NavItem({ path, label, icon: Icon, isActive }: NavItemProps) {
   return (
     <li>
       <Link href={path}>
-        <a 
+        <span 
           className={cn(
-            "flex items-center space-x-3 px-3 py-2 rounded-md transition-colors",
+            "flex items-center space-x-3 px-3 py-2 rounded-md transition-colors cursor-pointer",
             isActive 
               ? "bg-primary text-primary-foreground" 
               : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -52,7 +52,7 @@ function NavItem({ path, label, icon: Icon, isActive }: NavItemProps) {
         >
           <Icon className="w-4 h-4" />
           <span>{label}</span>
-        </a>
+        </span>
       </Link>
     </li>
   );

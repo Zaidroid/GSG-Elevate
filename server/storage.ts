@@ -266,6 +266,106 @@ export class DatabaseStorage implements IStorage {
       averageProgress: Math.round(avgProgress.avg || 0),
     };
   }
+
+  // Advanced Analytics methods
+  async getMarketPenetrationAnalytics(): Promise<any> {
+    // Mock data for demo - in real implementation, this would query actual data
+    return {
+      sectorPenetration: [
+        { sector: 'Technology', rate: 78, companies: 12 },
+        { sector: 'Healthcare', rate: 65, companies: 8 },
+        { sector: 'Finance', rate: 82, companies: 15 },
+        { sector: 'Manufacturing', rate: 71, companies: 10 },
+        { sector: 'Energy', rate: 69, companies: 6 }
+      ],
+      geographicDistribution: [
+        { name: 'North America', value: 35 },
+        { name: 'Europe', value: 28 },
+        { name: 'Asia Pacific', value: 22 },
+        { name: 'Latin America', value: 10 },
+        { name: 'Other', value: 5 }
+      ],
+      monthlyTrends: [
+        { month: 'Jan', entries: 4, success: 3 },
+        { month: 'Feb', entries: 6, success: 5 },
+        { month: 'Mar', entries: 8, success: 6 },
+        { month: 'Apr', entries: 5, success: 4 },
+        { month: 'May', entries: 9, success: 8 },
+        { month: 'Jun', entries: 7, success: 6 }
+      ]
+    };
+  }
+
+  async getProgressTrackingAnalytics(): Promise<any> {
+    return {
+      completionTimeline: [
+        { type: 'Legal Setup', planned: 45, actual: 38 },
+        { type: 'Market Research', planned: 30, actual: 35 },
+        { type: 'Regulatory', planned: 60, actual: 55 },
+        { type: 'Partnership', planned: 90, actual: 85 },
+        { type: 'Launch', planned: 120, actual: 105 }
+      ],
+      activeMilestones: [
+        { company: 'TechCorp Inc.', milestone: 'Legal Documentation', progress: 75, dueDate: '2024-02-15' },
+        { company: 'HealthPlus Ltd.', milestone: 'Regulatory Approval', progress: 45, dueDate: '2024-03-01' },
+        { company: 'GreenEnergy Co.', milestone: 'Market Research', progress: 90, dueDate: '2024-01-30' },
+        { company: 'FinanceFirst', milestone: 'Partnership Setup', progress: 30, dueDate: '2024-04-15' }
+      ]
+    };
+  }
+
+  async getRevenueImpactAnalytics(): Promise<any> {
+    return {
+      monthlyRevenue: [
+        { month: 'Jan', projected: 200000, actual: 180000 },
+        { month: 'Feb', projected: 250000, actual: 280000 },
+        { month: 'Mar', projected: 300000, actual: 320000 },
+        { month: 'Apr', projected: 350000, actual: 330000 },
+        { month: 'May', projected: 400000, actual: 420000 },
+        { month: 'Jun', projected: 450000, actual: 480000 }
+      ],
+      roiByMarket: [
+        { market: 'US', investment: 100000, returns: 320000, roi: 220 },
+        { market: 'EU', investment: 150000, returns: 400000, roi: 167 },
+        { market: 'APAC', investment: 80000, returns: 180000, roi: 125 },
+        { market: 'LATAM', investment: 60000, returns: 110000, roi: 83 }
+      ]
+    };
+  }
+
+  async getPerformanceMetrics(): Promise<any> {
+    return {
+      marketPenetrationRate: 67,
+      totalRevenueImpact: '2.4M',
+      avgCompletionRate: 84,
+      avgTimeToMarket: 156
+    };
+  }
+
+  async getComplianceAnalytics(): Promise<any> {
+    return {
+      compliantProjects: 28,
+      pendingReview: 7,
+      issuesFound: 3,
+      inProgress: 12,
+      riskAssessment: [
+        { risk: 'Regulatory Changes', impact: 'High', probability: 'Medium', status: 'Monitoring' },
+        { risk: 'Market Competition', impact: 'Medium', probability: 'High', status: 'Mitigating' },
+        { risk: 'Currency Fluctuation', impact: 'Medium', probability: 'Medium', status: 'Accepted' },
+        { risk: 'Legal Compliance', impact: 'High', probability: 'Low', status: 'Prevented' }
+      ]
+    };
+  }
+
+  async generateAnalyticsReport(type: string): Promise<any> {
+    // Mock report generation
+    return {
+      type,
+      generatedAt: new Date().toISOString(),
+      summary: `${type} analytics report containing comprehensive market access insights`,
+      dataPoints: Math.floor(Math.random() * 1000) + 500
+    };
+  }
 }
 
 export const storage = new DatabaseStorage();
