@@ -115,7 +115,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCompany(id: string): Promise<boolean> {
     const result = await db.delete(companies).where(eq(companies.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Legal Needs
@@ -149,7 +149,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteLegalNeed(id: string): Promise<boolean> {
     const result = await db.delete(legalNeeds).where(eq(legalNeeds.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Tasks
@@ -189,7 +189,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTask(id: string): Promise<boolean> {
     const result = await db.delete(tasks).where(eq(tasks.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Activities
@@ -241,7 +241,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDocument(id: string): Promise<boolean> {
     const result = await db.delete(documents).where(eq(documents.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   // Dashboard metrics

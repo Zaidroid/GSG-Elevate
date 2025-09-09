@@ -204,6 +204,7 @@ export default function LegalTaskForm({ onSuccess }: LegalTaskFormProps) {
                     rows={3}
                     placeholder="Describe the legal requirement"
                     {...field}
+                    value={field.value || ''}
                     data-testid="textarea-description"
                   />
                 </FormControl>

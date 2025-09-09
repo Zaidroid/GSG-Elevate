@@ -120,7 +120,7 @@ export default function LegalTasksStatus() {
                         <Clock className="w-3 h-3 mr-1" />
                         <span data-testid={`legal-task-due-${need.id}`}>
                           {(() => {
-                            const daysUntilDue = getDaysUntilDue(need.expectedCompletionDate);
+                            const daysUntilDue = getDaysUntilDue(need.expectedCompletionDate.toString());
                             if (daysUntilDue < 0) return `${Math.abs(daysUntilDue)} days overdue`;
                             if (daysUntilDue === 0) return 'Due today';
                             if (daysUntilDue === 1) return 'Due tomorrow';

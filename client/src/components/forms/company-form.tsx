@@ -174,6 +174,7 @@ export default function CompanyForm({ onSuccess }: CompanyFormProps) {
                     rows={3}
                     placeholder="Describe the company's business activities"
                     {...field}
+                    value={field.value || ''}
                     data-testid="textarea-description"
                   />
                 </FormControl>
@@ -189,7 +190,7 @@ export default function CompanyForm({ onSuccess }: CompanyFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Team Size</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
                     <FormControl>
                       <SelectTrigger data-testid="select-team-size">
                         <SelectValue placeholder="Select size" />
@@ -255,7 +256,7 @@ export default function CompanyForm({ onSuccess }: CompanyFormProps) {
                     <FormItem>
                       <FormLabel>Position</FormLabel>
                       <FormControl>
-                        <Input placeholder="Job title" {...field} data-testid="input-contact-position" />
+                        <Input placeholder="Job title" {...field} value={field.value || ''} data-testid="input-contact-position" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -285,7 +286,7 @@ export default function CompanyForm({ onSuccess }: CompanyFormProps) {
                     <FormItem>
                       <FormLabel>Phone</FormLabel>
                       <FormControl>
-                        <Input placeholder="+1 (555) 123-4567" {...field} data-testid="input-contact-phone" />
+                        <Input placeholder="+1 (555) 123-4567" {...field} value={field.value || ''} data-testid="input-contact-phone" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

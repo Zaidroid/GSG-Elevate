@@ -7,7 +7,12 @@ import LegalTasksStatus from "@/components/dashboard/legal-tasks-status";
 import MarketAnalytics from "@/components/dashboard/market-analytics";
 
 export default function Dashboard() {
-  const { data: metrics, isLoading: metricsLoading } = useQuery({
+  const { data: metrics, isLoading: metricsLoading } = useQuery<{
+    activeCompanies: number;
+    legalTasks: number;
+    totalDocuments: number;
+    averageProgress: number;
+  }>({
     queryKey: ["/api/dashboard/metrics"],
   });
 
