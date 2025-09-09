@@ -6,10 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Plus, Search, CheckSquare, Clock, User, Calendar } from "lucide-react";
+import TaskForm from "@/components/forms/task-form";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import type { Task } from "@shared/schema";
 
 export default function Tasks() {
   const [search, setSearch] = useState("");
+  const [showForm, setShowForm] = useState(false);
 
   const { data: tasks = [], isLoading } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
@@ -64,10 +67,17 @@ export default function Tasks() {
           <h1 className="text-2xl font-bold text-foreground mb-2">Tasks</h1>
           <p className="text-muted-foreground">Track and manage task assignments and progress</p>
         </div>
-        <Button data-testid="button-add-task">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Task
-        </Button>
+        <Dialog open={showForm} onOpenChange={setShowForm}>
+          <DialogTrigger asChild>
+            <Button data-testid="button-add-task">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Task
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <TaskForm onSuccess={() => setShowForm(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Search */}

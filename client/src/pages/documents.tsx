@@ -5,10 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, FileText, Upload, ExternalLink, Calendar } from "lucide-react";
+import DocumentUpload from "@/components/forms/document-upload";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import type { Document } from "@shared/schema";
 
 export default function Documents() {
   const [search, setSearch] = useState("");
+  const [showUpload, setShowUpload] = useState(false);
 
   const { data: documents = [], isLoading } = useQuery<Document[]>({
     queryKey: ["/api/documents"],
@@ -78,10 +81,17 @@ export default function Documents() {
           <h1 className="text-2xl font-bold text-foreground mb-2">Documents</h1>
           <p className="text-muted-foreground">Manage documents with Google Drive integration</p>
         </div>
-        <Button data-testid="button-upload-document">
-          <Upload className="w-4 h-4 mr-2" />
-          Upload Document
-        </Button>
+        <Dialog open={showUpload} onOpenChange={setShowUpload}>
+          <DialogTrigger asChild>
+            <Button data-testid="button-upload-document">
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Document
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DocumentUpload onSuccess={() => setShowUpload(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Search */}
