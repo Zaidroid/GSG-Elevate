@@ -6,6 +6,7 @@ import {
   insertActivitySchema, insertDocumentSchema, insertUserSchema 
 } from "@shared/schema";
 import { z } from "zod";
+import { aiService } from "./ai-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Users routes
@@ -365,6 +366,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to generate report" });
+    }
+  });
+
+  // AI Analysis endpoints
+  app.post("/api/ai/analyze-document/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const document = await storage.getDocument(id);
+      
+      if (!document) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+
+      // In a real implementation, you would extract text from the document
+      // For demo purposes, we'll use a sample text
+      const documentContent = `
+        This is a sample legal document for analysis.
+        
+        AGREEMENT
+        
+        This Agreement is entered into between Company A and Company B for the provision of services.
+        
+        TERMS AND CONDITIONS:
+        1. Service Provision: Company B will provide consulting services to Company A.
+        2. Payment Terms: Payment is due within 30 days of invoice.
+        3. Liability: Neither party shall be liable for indirect damages.
+        4. Termination: Either party may terminate with 30 days notice.
+        5. Governing Law: This agreement is governed by the laws of [Jurisdiction].
+        
+        CONFIDENTIALITY:
+        Both parties agree to maintain confidentiality of all shared information.
+        
+        INTELLECTUAL PROPERTY:
+        Each party retains ownership of their respective intellectual property.
+      `;
+
+      const analysis = await aiService.analyzeDocument({
+        documentContent,
+        documentType: document.type || 'contract'
+      });
+
+      // Store the analysis result
+      await storage.storeDocumentAnalysis(id, analysis);
+
+      res.json(analysis);
+    } catch (error) {
+      console.error('AI analysis error:', error);
+      res.status(500).json({ message: "Failed to analyze document" });
+    }
+  });
+
+  app.get("/api/documents/:id/analysis", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const analysis = await storage.getDocumentAnalysis(id);
+      
+      if (!analysis) {
+        return res.status(404).json({ message: "No analysis found for this document" });
+      }
+      
+      res.json(analysis);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch document analysis" });
+    }
+  });
+
+  app.post("/api/ai/compliance-check", async (req, res) => {
+    try {
+      const { documentContent, regulations } = req.body;
+      
+      if (!documentContent) {
+        return res.status(400).json({ message: "Document content is required" });
+      }
+
+      const complianceResult = await aiService.checkCompliance(
+        documentContent, 
+        regulations || ['GDPR', 'Consumer Protection', 'Contract Law']
+      );
+
+      res.json(complianceResult);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check compliance" });
+    }
+  });
+
+  app.post("/api/ai/extract-info", async (req, res) => {
+    try {
+      const { documentContent } = req.body;
+      
+      if (!documentContent) {
+        return res.status(400).json({ message: "Document content is required" });
+      }
+
+      const extractedInfo = await aiService.extractKeyInformation(documentContent);
+      res.json(extractedInfo);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to extract information" });
     }
   });
 

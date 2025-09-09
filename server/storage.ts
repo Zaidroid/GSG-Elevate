@@ -366,6 +366,29 @@ export class DatabaseStorage implements IStorage {
       dataPoints: Math.floor(Math.random() * 1000) + 500
     };
   }
+
+  // AI Analysis storage methods
+  async storeDocumentAnalysis(documentId: string, analysis: any): Promise<void> {
+    // In a real implementation, this would store the analysis in the database
+    // For demo purposes, we'll use in-memory storage
+    if (!this.documentAnalyses) {
+      this.documentAnalyses = new Map();
+    }
+    this.documentAnalyses.set(documentId, {
+      ...analysis,
+      analyzedAt: new Date().toISOString(),
+      documentId
+    });
+  }
+
+  async getDocumentAnalysis(documentId: string): Promise<any> {
+    if (!this.documentAnalyses) {
+      return null;
+    }
+    return this.documentAnalyses.get(documentId) || null;
+  }
+
+  private documentAnalyses?: Map<string, any>;
 }
 
 export const storage = new DatabaseStorage();
