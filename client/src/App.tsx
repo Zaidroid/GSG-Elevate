@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
+import { ThemeProvider } from "@/hooks/use-theme";
 import { RouteGuard } from "@/components/auth/route-guard";
 import Layout from "@/components/layout/layout";
 import Dashboard from "@/pages/dashboard";
@@ -13,6 +14,10 @@ import Documents from "@/pages/documents";
 import Tasks from "@/pages/tasks";
 import Analytics from "@/pages/analytics";
 import Automation from "@/pages/automation";
+import Hours from "@/pages/hours";
+import Compliance from "@/pages/compliance";
+import Partnerships from "@/pages/partnerships";
+import Research from "@/pages/research";
 import Settings from "@/pages/settings";
 import UserManagement from "@/pages/user-management";
 import LoginPage from "@/pages/auth/login";
@@ -84,6 +89,34 @@ function Router() {
           </Layout>
         </RouteGuard>
       </Route>
+      <Route path="/hours">
+        <RouteGuard>
+          <Layout>
+            <Hours />
+          </Layout>
+        </RouteGuard>
+      </Route>
+      <Route path="/compliance">
+        <RouteGuard>
+          <Layout>
+            <Compliance />
+          </Layout>
+        </RouteGuard>
+      </Route>
+      <Route path="/partnerships">
+        <RouteGuard>
+          <Layout>
+            <Partnerships />
+          </Layout>
+        </RouteGuard>
+      </Route>
+      <Route path="/research">
+        <RouteGuard>
+          <Layout>
+            <Research />
+          </Layout>
+        </RouteGuard>
+      </Route>
       <Route path="/settings">
         <RouteGuard>
           <Layout>
@@ -114,12 +147,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </AuthProvider>
+      <ThemeProvider defaultTheme="system" storageKey="market-access-theme">
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

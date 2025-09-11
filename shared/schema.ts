@@ -16,6 +16,26 @@ export const legalCategoryEnum = pgEnum('legal_category', [
   'digital_policies',
   'regulatory_compliance'
 ]);
+export const timeCategoryEnum = pgEnum('time_category', [
+  'legal_support',
+  'research', 
+  'documentation',
+  'meetings',
+  'administration',
+  'other'
+]);
+export const projectStatusEnum = pgEnum('project_status', [
+  'active',
+  'completed', 
+  'paused',
+  'cancelled'
+]);
+export const timeEntryStatusEnum = pgEnum('time_entry_status', [
+  'draft',
+  'submitted',
+  'approved',
+  'rejected'
+]);
 
 // Users table
 export const users = pgTable("users", {
@@ -195,6 +215,68 @@ export const documents = pgTable("documents", {
   uploadedBy: varchar("uploaded_by").references(() => users.id),
 });
 
+// Projects table (for hours tracking)
+export const projects = pgTable("projects", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Project Details
+  name: text("name").notNull(),
+  clientName: text("client_name"),
+  description: text("description"),
+  
+  // Relationships
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: 'cascade' }),
+  
+  // Budget & Rates
+  hourlyRate: integer("hourly_rate"), // Rate in cents to avoid floating point issues
+  budgetHours: integer("budget_hours"),
+  totalHours: integer("total_hours").default(0), // Total hours logged so far (in minutes)
+  
+  // Status & Timeline
+  status: projectStatusEnum("status").notNull().default('active'),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  
+  // Google Integration
+  googleSheetId: text("google_sheet_id"),
+  
+  // Metadata
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  createdBy: varchar("created_by").references(() => users.id),
+});
+
+// Time Entries table
+export const timeEntries = pgTable("time_entries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Relationships
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  projectId: varchar("project_id").notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  companyId: varchar("company_id").references(() => companies.id, { onDelete: 'cascade' }),
+  
+  // Time Details
+  taskDescription: text("task_description").notNull(),
+  hours: integer("hours").notNull(), // Hours in minutes to avoid floating point issues
+  date: timestamp("date").notNull(),
+  
+  // Categorization
+  category: timeCategoryEnum("category").notNull().default('legal_support'),
+  
+  // Additional Info
+  notes: text("notes"),
+  billableRate: integer("billable_rate"), // Rate in cents, can override project rate
+  
+  // Status & Approval
+  status: timeEntryStatusEnum("status").notNull().default('submitted'),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  
+  // Metadata
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   company: one(companies, {
@@ -206,6 +288,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   assignedTasks: many(tasks),
   activities: many(activities),
   uploadedDocuments: many(documents),
+  timeEntries: many(timeEntries),
+  createdProjects: many(projects),
 }));
 
 export const companiesRelations = relations(companies, ({ one, many }) => ({
@@ -218,6 +302,7 @@ export const companiesRelations = relations(companies, ({ one, many }) => ({
   tasks: many(tasks),
   activities: many(activities),
   documents: many(documents),
+  projects: many(projects),
 }));
 
 export const legalNeedsRelations = relations(legalNeeds, ({ one, many }) => ({
@@ -282,6 +367,37 @@ export const documentsRelations = relations(documents, ({ one }) => ({
   }),
 }));
 
+export const projectsRelations = relations(projects, ({ one, many }) => ({
+  company: one(companies, {
+    fields: [projects.companyId],
+    references: [companies.id],
+  }),
+  creator: one(users, {
+    fields: [projects.createdBy],
+    references: [users.id],
+  }),
+  timeEntries: many(timeEntries),
+}));
+
+export const timeEntriesRelations = relations(timeEntries, ({ one }) => ({
+  user: one(users, {
+    fields: [timeEntries.userId],
+    references: [users.id],
+  }),
+  project: one(projects, {
+    fields: [timeEntries.projectId],
+    references: [projects.id],
+  }),
+  company: one(companies, {
+    fields: [timeEntries.companyId],
+    references: [companies.id],
+  }),
+  approver: one(users, {
+    fields: [timeEntries.approvedBy],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -318,6 +434,18 @@ export const insertDocumentSchema = createInsertSchema(documents).omit({
   updatedAt: true,
 });
 
+export const insertProjectSchema = createInsertSchema(projects).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTimeEntrySchema = createInsertSchema(timeEntries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -331,3 +459,7 @@ export type Activity = typeof activities.$inferSelect;
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Document = typeof documents.$inferSelect;
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type TimeEntry = typeof timeEntries.$inferSelect;
+export type InsertTimeEntry = z.infer<typeof insertTimeEntrySchema>;

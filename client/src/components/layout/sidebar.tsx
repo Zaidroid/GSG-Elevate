@@ -13,7 +13,11 @@ import {
   Settings,
   Zap,
   Menu,
-  ChevronLeft
+  ChevronLeft,
+  Clock,
+  Shield,
+  Handshake,
+  TrendingUp
 } from "lucide-react";
 
 const mainMenuItems = [
@@ -22,11 +26,15 @@ const mainMenuItems = [
   { path: "/legal-support", label: "Legal Support", icon: Scale },
   { path: "/documents", label: "Documents", icon: FileText },
   { path: "/tasks", label: "Tasks", icon: CheckSquare },
+  { path: "/compliance", label: "Compliance", icon: Shield },
+  { path: "/partnerships", label: "Partnerships", icon: Handshake },
+  { path: "/research", label: "Market Research", icon: TrendingUp },
 ];
 
 const analyticsItems = [
   { path: "/analytics", label: "Advanced Analytics", icon: BarChart3 },
   { path: "/automation", label: "Workflow Automation", icon: Zap },
+  { path: "/hours", label: "Hours Tracker", icon: Clock },
 ];
 
 const adminItems = [

@@ -1,8 +1,9 @@
 import { 
-  users, companies, legalNeeds, tasks, activities, documents,
+  users, companies, legalNeeds, tasks, activities, documents, projects, timeEntries,
   type User, type InsertUser, type Company, type InsertCompany,
   type LegalNeed, type InsertLegalNeed, type Task, type InsertTask,
-  type Activity, type InsertActivity, type Document, type InsertDocument
+  type Activity, type InsertActivity, type Document, type InsertDocument,
+  type Project, type InsertProject, type TimeEntry, type InsertTimeEntry
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql } from "drizzle-orm";
@@ -51,6 +52,32 @@ export interface IStorage {
   createDocument(document: InsertDocument): Promise<Document>;
   updateDocument(id: string, document: Partial<InsertDocument>): Promise<Document | undefined>;
   deleteDocument(id: string): Promise<boolean>;
+
+  // Projects (Hours Tracking)
+  getProject(id: string): Promise<Project | undefined>;
+  getProjectsByCompany(companyId: string): Promise<Project[]>;
+  getProjects(): Promise<Project[]>;
+  createProject(project: InsertProject): Promise<Project>;
+  updateProject(id: string, project: Partial<InsertProject>): Promise<Project | undefined>;
+  deleteProject(id: string): Promise<boolean>;
+
+  // Time Entries
+  getTimeEntry(id: string): Promise<TimeEntry | undefined>;
+  getTimeEntriesByUser(userId: string): Promise<TimeEntry[]>;
+  getTimeEntriesByProject(projectId: string): Promise<TimeEntry[]>;
+  getTimeEntriesByDateRange(userId: string, startDate: Date, endDate: Date): Promise<TimeEntry[]>;
+  getTimeEntries(): Promise<TimeEntry[]>;
+  createTimeEntry(timeEntry: InsertTimeEntry): Promise<TimeEntry>;
+  updateTimeEntry(id: string, timeEntry: Partial<InsertTimeEntry>): Promise<TimeEntry | undefined>;
+  deleteTimeEntry(id: string): Promise<boolean>;
+
+  // Hours Analytics
+  getWeeklySummary(userId: string): Promise<{
+    totalHours: number;
+    billableHours: number;
+    projects: number;
+    averageDaily: number;
+  }>;
 
   // Dashboard metrics
   getDashboardMetrics(): Promise<{
@@ -389,6 +416,129 @@ export class DatabaseStorage implements IStorage {
   }
 
   private documentAnalyses?: Map<string, any>;
+
+  // Projects (Hours Tracking)
+  async getProject(id: string): Promise<Project | undefined> {
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project || undefined;
+  }
+
+  async getProjectsByCompany(companyId: string): Promise<Project[]> {
+    return await db.select().from(projects)
+      .where(eq(projects.companyId, companyId))
+      .orderBy(desc(projects.createdAt));
+  }
+
+  async getProjects(): Promise<Project[]> {
+    return await db.select().from(projects).orderBy(desc(projects.createdAt));
+  }
+
+  async createProject(insertProject: InsertProject): Promise<Project> {
+    const [project] = await db.insert(projects).values(insertProject).returning();
+    return project;
+  }
+
+  async updateProject(id: string, insertProject: Partial<InsertProject>): Promise<Project | undefined> {
+    const [project] = await db.update(projects)
+      .set({ ...insertProject, updatedAt: new Date() })
+      .where(eq(projects.id, id))
+      .returning();
+    return project || undefined;
+  }
+
+  async deleteProject(id: string): Promise<boolean> {
+    const result = await db.delete(projects).where(eq(projects.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // Time Entries
+  async getTimeEntry(id: string): Promise<TimeEntry | undefined> {
+    const [timeEntry] = await db.select().from(timeEntries).where(eq(timeEntries.id, id));
+    return timeEntry || undefined;
+  }
+
+  async getTimeEntriesByUser(userId: string): Promise<TimeEntry[]> {
+    return await db.select().from(timeEntries)
+      .where(eq(timeEntries.userId, userId))
+      .orderBy(desc(timeEntries.date));
+  }
+
+  async getTimeEntriesByProject(projectId: string): Promise<TimeEntry[]> {
+    return await db.select().from(timeEntries)
+      .where(eq(timeEntries.projectId, projectId))
+      .orderBy(desc(timeEntries.date));
+  }
+
+  async getTimeEntriesByDateRange(userId: string, startDate: Date, endDate: Date): Promise<TimeEntry[]> {
+    return await db.select().from(timeEntries)
+      .where(and(
+        eq(timeEntries.userId, userId),
+        sql`${timeEntries.date} >= ${startDate}`,
+        sql`${timeEntries.date} <= ${endDate}`
+      ))
+      .orderBy(desc(timeEntries.date));
+  }
+
+  async getTimeEntries(): Promise<TimeEntry[]> {
+    return await db.select().from(timeEntries).orderBy(desc(timeEntries.date));
+  }
+
+  async createTimeEntry(insertTimeEntry: InsertTimeEntry): Promise<TimeEntry> {
+    const [timeEntry] = await db.insert(timeEntries).values(insertTimeEntry).returning();
+    return timeEntry;
+  }
+
+  async updateTimeEntry(id: string, insertTimeEntry: Partial<InsertTimeEntry>): Promise<TimeEntry | undefined> {
+    const [timeEntry] = await db.update(timeEntries)
+      .set({ ...insertTimeEntry, updatedAt: new Date() })
+      .where(eq(timeEntries.id, id))
+      .returning();
+    return timeEntry || undefined;
+  }
+
+  async deleteTimeEntry(id: string): Promise<boolean> {
+    const result = await db.delete(timeEntries).where(eq(timeEntries.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // Hours Analytics
+  async getWeeklySummary(userId: string): Promise<{
+    totalHours: number;
+    billableHours: number;
+    projects: number;
+    averageDaily: number;
+  }> {
+    const startOfWeekDate = new Date();
+    startOfWeekDate.setDate(startOfWeekDate.getDate() - startOfWeekDate.getDay());
+    startOfWeekDate.setHours(0, 0, 0, 0);
+
+    const endOfWeekDate = new Date(startOfWeekDate);
+    endOfWeekDate.setDate(startOfWeekDate.getDate() + 6);
+    endOfWeekDate.setHours(23, 59, 59, 999);
+
+    // Get time entries for the week
+    const entries = await this.getTimeEntriesByDateRange(userId, startOfWeekDate, endOfWeekDate);
+    
+    const totalMinutes = entries.reduce((sum, entry) => sum + (entry.hours || 0), 0);
+    const totalHours = Math.round((totalMinutes / 60) * 100) / 100;
+    
+    // Assume all hours are billable for now - can be refined with business logic
+    const billableHours = totalHours;
+    
+    // Get unique projects
+    const uniqueProjects = new Set(entries.map(entry => entry.projectId));
+    const projects = uniqueProjects.size;
+    
+    // Calculate average daily (over 7 days)
+    const averageDaily = Math.round((totalHours / 7) * 100) / 100;
+
+    return {
+      totalHours,
+      billableHours,
+      projects,
+      averageDaily
+    };
+  }
 
   // Workflow automation methods
   async getWorkflowRules(): Promise<any[]> {

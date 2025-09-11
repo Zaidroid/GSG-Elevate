@@ -37,12 +37,13 @@ if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is required');
 }
 
-// Session setup
+// Session setup - only for API routes, not static assets
 const PgSession = ConnectPgSimple(session);
-app.use(session({
+const sessionMiddleware = session({
   store: new PgSession({
     conString: process.env.DATABASE_URL,
-    tableName: 'session'
+    tableName: 'session',
+    createTableIfMissing: true
   }),
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -53,7 +54,10 @@ app.use(session({
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
   }
-}));
+});
+
+// Apply session middleware only to API routes
+app.use('/api', sessionMiddleware);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
