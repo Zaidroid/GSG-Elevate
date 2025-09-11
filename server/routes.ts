@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { randomBytes } from "crypto";
 import { storage } from "./storage";
 import { 
   insertCompanySchema, insertLegalNeedSchema, insertTaskSchema, 
@@ -7,10 +8,279 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { aiService } from "./ai-service";
+import { googleService } from "./google-service";
+import { 
+  requireAuth, requireAdmin, requireUserManagement, requireLegalAccess,
+  requireCompanyAccess, requireCompanyModify, checkCompanyAccess,
+  type AuthenticatedRequest 
+} from "./auth-middleware";
+// Auth helper functions
+function generateGoogleOAuthUrl(
+  clientId: string,
+  redirectUri: string,
+  state: string,
+  scopes: string[] = [
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/userinfo.profile',
+    'https://www.googleapis.com/auth/userinfo.email'
+  ]
+): string {
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: 'code',
+    scope: scopes.join(' '),
+    access_type: 'offline',
+    prompt: 'consent',
+    state: state
+  });
+  return `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+}
+
+function generateSecureState(): string {
+  return randomBytes(32).toString('hex');
+}
+
+async function exchangeCodeForTokens(
+  code: string,
+  clientId: string,
+  clientSecret: string,
+  redirectUri: string
+): Promise<any> {
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      code,
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: redirectUri,
+      grant_type: 'authorization_code',
+    }),
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Token exchange failed: ${response.status}`);
+  }
+  
+  return response.json();
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication routes
+  app.get("/api/auth/google-url", async (req, res) => {
+    try {
+      const redirectUri = `${req.protocol}://${req.get('host')}/auth/callback`;
+      const state = generateSecureState();
+      
+      // Store state in session for validation
+      (req as any).session.oauthState = state;
+      
+      const url = generateGoogleOAuthUrl(
+        process.env.GOOGLE_CLIENT_ID!,
+        redirectUri,
+        state
+      );
+      res.json({ url });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate OAuth URL" });
+    }
+  });
+
+  app.post("/api/auth/google-callback", async (req, res) => {
+    try {
+      const { code, state } = req.body;
+      if (!code) {
+        return res.status(400).json({ message: "Authorization code required" });
+      }
+      
+      // Validate state parameter for CSRF protection
+      if (!state || state !== (req as any).session.oauthState) {
+        return res.status(400).json({ message: "Invalid state parameter" });
+      }
+      
+      // Clear the state from session after validation
+      delete (req as any).session.oauthState;
+
+      const redirectUri = `${req.protocol}://${req.get('host')}/auth/callback`;
+      
+      // Exchange code for tokens
+      const tokenData = await exchangeCodeForTokens(
+        code,
+        process.env.GOOGLE_CLIENT_ID!,
+        process.env.GOOGLE_CLIENT_SECRET!,
+        redirectUri
+      );
+
+      // Get user info from Google
+      const userResponse = await fetch(
+        `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokenData.access_token}`
+      );
+      const googleUser = await userResponse.json();
+
+      // Check if user exists
+      let user = await storage.getUserByEmail(googleUser.email);
+      
+      if (!user) {
+        // Create new user with default role
+        const userData = {
+          email: googleUser.email,
+          name: googleUser.name,
+          role: 'program_officer' as const,
+          profilePictureUrl: googleUser.picture,
+          googleTokens: {
+            accessToken: tokenData.access_token,
+            refreshToken: tokenData.refresh_token,
+            expiryDate: new Date(Date.now() + tokenData.expires_in * 1000),
+            scope: tokenData.scope?.split(' ') || []
+          },
+          lastLoginAt: new Date(),
+          isActive: true
+        };
+        user = await storage.createUser(userData);
+      } else {
+        // Update existing user's tokens and last login
+        await storage.updateUser(user.id, {
+          googleTokens: {
+            accessToken: tokenData.access_token,
+            refreshToken: tokenData.refresh_token,
+            expiryDate: new Date(Date.now() + tokenData.expires_in * 1000),
+            scope: tokenData.scope?.split(' ') || []
+          },
+          lastLoginAt: new Date()
+        });
+      }
+
+      // Set session
+      (req as any).session.userId = user.id;
+      
+      res.json({ 
+        user: { 
+          id: user.id, 
+          name: user.name, 
+          email: user.email, 
+          role: user.role 
+        } 
+      });
+    } catch (error) {
+      console.error('Auth callback error:', error);
+      res.status(500).json({ message: "Authentication failed" });
+    }
+  });
+
+  app.get("/api/auth/me", async (req, res) => {
+    try {
+      const userId = (req as any).session?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({ 
+        user: { 
+          id: user.id, 
+          name: user.name, 
+          email: user.email, 
+          role: user.role 
+        } 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get user info" });
+    }
+  });
+
+  app.post("/api/auth/logout", async (req, res) => {
+    (req as any).session.destroy((err: any) => {
+      if (err) {
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.clearCookie('connect.sid');
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+
+  // Google integration routes
+  app.post("/api/google/initialize", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const structure = await googleService.initializeDriveStructure();
+      const spreadsheetId = await googleService.createTrackingSpreadsheet();
+      
+      res.json({
+        message: "Google integration initialized successfully",
+        driveStructure: structure,
+        spreadsheetId: spreadsheetId
+      });
+    } catch (error) {
+      console.error('Google initialization error:', error);
+      res.status(500).json({ message: "Failed to initialize Google integration" });
+    }
+  });
+
+  app.post("/api/google/sync", requireAuth, requireUserManagement, async (req, res) => {
+    try {
+      const { spreadsheetId } = req.body;
+      if (!spreadsheetId) {
+        return res.status(400).json({ message: "Spreadsheet ID required" });
+      }
+      
+      await googleService.performFullSync(spreadsheetId);
+      res.json({ message: "Data synchronized successfully" });
+    } catch (error) {
+      console.error('Google sync error:', error);
+      res.status(500).json({ message: "Failed to sync data" });
+    }
+  });
+
+  app.post("/api/companies/:id/create-folder", requireAuth, requireCompanyModify, async (req, res) => {
+    try {
+      const company = await storage.getCompany(req.params.id);
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      
+      const { parentFolderId } = req.body;
+      if (!parentFolderId) {
+        return res.status(400).json({ message: "Parent folder ID required" });
+      }
+      
+      const folderId = await googleService.createCompanyFolder(company.name, parentFolderId);
+      
+      // Update company with folder ID
+      await storage.updateCompany(company.id, {
+        googleDriveFolderId: folderId
+      });
+      
+      res.json({ 
+        message: "Company folder created successfully",
+        folderId: folderId
+      });
+    } catch (error) {
+      console.error('Company folder creation error:', error);
+      res.status(500).json({ message: "Failed to create company folder" });
+    }
+  });
+
+  // Health check routes (public)
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "healthy", timestamp: new Date().toISOString() });
+  });
+
+  app.get("/api/health/db", async (req, res) => {
+    try {
+      await storage.getUsers();
+      res.json({ status: "healthy", service: "database" });
+    } catch (error) {
+      res.status(500).json({ status: "unhealthy", service: "database", error: error.message });
+    }
+  });
+
   // Users routes
-  app.get("/api/users", async (req, res) => {
+  app.get("/api/users", requireAuth, requireUserManagement, async (req, res) => {
     try {
       const users = await storage.getUsers();
       res.json(users);
@@ -19,7 +289,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/:id", async (req, res) => {
+  app.get("/api/users/:id", requireAuth, requireUserManagement, async (req, res) => {
     try {
       const user = await storage.getUser(req.params.id);
       if (!user) {
@@ -31,7 +301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/users", async (req, res) => {
+  app.post("/api/users", requireAuth, requireAdmin, async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       const user = await storage.createUser(userData);
@@ -45,7 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Companies routes
-  app.get("/api/companies", async (req, res) => {
+  app.get("/api/companies", requireAuth, requireCompanyAccess, async (req, res) => {
     try {
       const companies = await storage.getCompanies();
       res.json(companies);
@@ -54,7 +324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/companies/:id", async (req, res) => {
+  app.get("/api/companies/:id", requireAuth, requireCompanyAccess, checkCompanyAccess, async (req, res) => {
     try {
       const company = await storage.getCompany(req.params.id);
       if (!company) {
@@ -66,7 +336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/companies", async (req, res) => {
+  app.post("/api/companies", requireAuth, requireCompanyModify, async (req, res) => {
     try {
       const companyData = insertCompanySchema.parse(req.body);
       const company = await storage.createCompany(companyData);
@@ -90,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/companies/:id", async (req, res) => {
+  app.patch("/api/companies/:id", requireAuth, requireCompanyModify, checkCompanyAccess, async (req, res) => {
     try {
       const updateData = insertCompanySchema.partial().parse(req.body);
       const company = await storage.updateCompany(req.params.id, updateData);
@@ -106,7 +376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/companies/:id", async (req, res) => {
+  app.delete("/api/companies/:id", requireAuth, requireCompanyModify, async (req, res) => {
     try {
       const success = await storage.deleteCompany(req.params.id);
       if (!success) {
@@ -119,7 +389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Legal Needs routes
-  app.get("/api/legal-needs", async (req, res) => {
+  app.get("/api/legal-needs", requireAuth, requireLegalAccess, async (req, res) => {
     try {
       const companyId = req.query.companyId as string;
       let legalNeeds;
@@ -136,7 +406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/legal-needs", async (req, res) => {
+  app.post("/api/legal-needs", requireAuth, requireLegalAccess, async (req, res) => {
     try {
       const legalNeedData = insertLegalNeedSchema.parse(req.body);
       const legalNeed = await storage.createLegalNeed(legalNeedData);
@@ -160,7 +430,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/legal-needs/:id", async (req, res) => {
+  app.patch("/api/legal-needs/:id", requireAuth, requireLegalAccess, async (req, res) => {
     try {
       const updateData = insertLegalNeedSchema.partial().parse(req.body);
       const legalNeed = await storage.updateLegalNeed(req.params.id, updateData);
@@ -177,7 +447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tasks routes
-  app.get("/api/tasks", async (req, res) => {
+  app.get("/api/tasks", requireAuth, async (req, res) => {
     try {
       const { companyId, assigneeId } = req.query;
       let tasks;
@@ -196,7 +466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/tasks", async (req, res) => {
+  app.post("/api/tasks", requireAuth, async (req, res) => {
     try {
       const taskData = insertTaskSchema.parse(req.body);
       const task = await storage.createTask(taskData);
@@ -220,7 +490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/tasks/:id", async (req, res) => {
+  app.patch("/api/tasks/:id", requireAuth, async (req, res) => {
     try {
       const updateData = insertTaskSchema.partial().parse(req.body);
       const task = await storage.updateTask(req.params.id, updateData);
@@ -237,7 +507,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Activities routes
-  app.get("/api/activities", async (req, res) => {
+  app.get("/api/activities", requireAuth, async (req, res) => {
     try {
       const { companyId, limit } = req.query;
       let activities;
@@ -255,7 +525,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Documents routes
-  app.get("/api/documents", async (req, res) => {
+  app.get("/api/documents", requireAuth, requireCompanyAccess, async (req, res) => {
     try {
       const companyId = req.query.companyId as string;
       let documents;
@@ -272,7 +542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/documents", async (req, res) => {
+  app.post("/api/documents", requireAuth, requireCompanyAccess, async (req, res) => {
     try {
       const documentData = insertDocumentSchema.parse(req.body);
       const document = await storage.createDocument(documentData);
@@ -297,7 +567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard metrics
-  app.get("/api/dashboard/metrics", async (req, res) => {
+  app.get("/api/dashboard/metrics", requireAuth, async (req, res) => {
     try {
       const metrics = await storage.getDashboardMetrics();
       res.json(metrics);
@@ -307,7 +577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Advanced Analytics endpoints
-  app.get("/api/analytics/market-penetration", async (req, res) => {
+  app.get("/api/analytics/market-penetration", requireAuth, requireUserManagement, async (req, res) => {
     try {
       const analytics = await storage.getMarketPenetrationAnalytics();
       res.json(analytics);
@@ -316,7 +586,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/analytics/progress-tracking", async (req, res) => {
+  app.get("/api/analytics/progress-tracking", requireAuth, requireUserManagement, async (req, res) => {
     try {
       const analytics = await storage.getProgressTrackingAnalytics();
       res.json(analytics);
@@ -325,7 +595,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/analytics/revenue-impact", async (req, res) => {
+  app.get("/api/analytics/revenue-impact", requireAuth, requireUserManagement, async (req, res) => {
     try {
       const analytics = await storage.getRevenueImpactAnalytics();
       res.json(analytics);
@@ -334,7 +604,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/analytics/performance-metrics", async (req, res) => {
+  app.get("/api/analytics/performance-metrics", requireAuth, requireUserManagement, async (req, res) => {
     try {
       const analytics = await storage.getPerformanceMetrics();
       res.json(analytics);
@@ -343,7 +613,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/analytics/compliance-status", async (req, res) => {
+  app.get("/api/analytics/compliance-status", requireAuth, requireLegalAccess, async (req, res) => {
     try {
       const analytics = await storage.getComplianceAnalytics();
       res.json(analytics);
@@ -352,7 +622,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/analytics/export/:type", async (req, res) => {
+  app.post("/api/analytics/export/:type", requireAuth, requireUserManagement, async (req, res) => {
     try {
       const { type } = req.params;
       const reportData = await storage.generateAnalyticsReport(type);
@@ -370,7 +640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Analysis endpoints
-  app.post("/api/ai/analyze-document/:id", async (req, res) => {
+  app.post("/api/ai/analyze-document/:id", requireAuth, requireLegalAccess, async (req, res) => {
     try {
       const { id } = req.params;
       const document = await storage.getDocument(id);
@@ -432,7 +702,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/ai/compliance-check", async (req, res) => {
+  app.post("/api/ai/compliance-check", requireAuth, requireLegalAccess, async (req, res) => {
     try {
       const { documentContent, regulations } = req.body;
       
@@ -451,7 +721,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/ai/extract-info", async (req, res) => {
+  app.post("/api/ai/extract-info", requireAuth, requireLegalAccess, async (req, res) => {
     try {
       const { documentContent } = req.body;
       
@@ -467,7 +737,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Workflow Automation endpoints
-  app.get("/api/workflow/rules", async (req, res) => {
+  app.get("/api/workflow/rules", requireAuth, async (req, res) => {
     try {
       const rules = await storage.getWorkflowRules();
       res.json(rules);
@@ -476,7 +746,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/workflow/stats", async (req, res) => {
+  app.get("/api/workflow/stats", requireAuth, async (req, res) => {
     try {
       const stats = await storage.getWorkflowStats();
       res.json(stats);
@@ -485,7 +755,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/workflow/rules/:id/toggle", async (req, res) => {
+  app.post("/api/workflow/rules/:id/toggle", requireAuth, requireAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const { isActive } = req.body;
@@ -497,7 +767,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/workflow/rules/:id/execute", async (req, res) => {
+  app.post("/api/workflow/rules/:id/execute", requireAuth, requireUserManagement, async (req, res) => {
     try {
       const { id } = req.params;
       

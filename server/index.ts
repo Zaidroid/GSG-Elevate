@@ -1,8 +1,60 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
+import ConnectPgSimple from "connect-pg-simple";
+import { db } from "./db";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { 
+  configureProductionMiddleware, 
+  setupErrorHandling, 
+  setupHealthChecks, 
+  setupRequestLogging 
+} from "./production-config";
 
 const app = express();
+
+// Trust proxy for production environments (required for rate limiting, security headers)
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
+// Apply production middleware
+if (process.env.NODE_ENV === 'production') {
+  configureProductionMiddleware(app);
+} else {
+  // Basic development logging
+  setupRequestLogging(app);
+}
+
+// Set up health checks
+setupHealthChecks(app);
+
+// Validate required environment variables
+if (!process.env.SESSION_SECRET) {
+  throw new Error('SESSION_SECRET environment variable is required');
+}
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is required');
+}
+
+// Session setup
+const PgSession = ConnectPgSimple(session);
+app.use(session({
+  store: new PgSession({
+    conString: process.env.DATABASE_URL,
+    tableName: 'session'
+  }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
+  }
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -39,13 +91,8 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
-  });
+  // Set up proper error handling
+  setupErrorHandling(app);
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
@@ -61,11 +108,28 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
+  
+  const httpServer = server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
   });
+
+  // Graceful shutdown handling
+  const shutdown = (signal: string) => {
+    log(`Received ${signal}, shutting down gracefully...`);
+    httpServer.close((err) => {
+      if (err) {
+        log(`Error during shutdown: ${err.message}`);
+        process.exit(1);
+      }
+      log('Server closed successfully');
+      process.exit(0);
+    });
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 })();

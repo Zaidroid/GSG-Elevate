@@ -13,16 +13,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [, navigate] = useLocation();
 
-  // Mock user data - in a real app this would come from authentication
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    initials: "JD"
+  const { user, logout } = useAuth();
+  
+  // Generate user initials from name
+  const getInitials = (name: string) => {
+    return name.split(' ').map(part => part[0]).join('').toUpperCase();
   };
 
   const notifications = [
@@ -121,10 +122,10 @@ export default function Header() {
               <Button variant="ghost" className="flex items-center space-x-2" data-testid="button-user-menu">
                 <Avatar className="w-8 h-8">
                   <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                    {user.initials}
+                    {user ? getInitials(user.name) : 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-foreground font-medium">{user.name}</span>
+                <span className="text-foreground font-medium">{user?.name || 'User'}</span>
                 <ChevronDown className="w-4 h-4 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
@@ -177,6 +178,7 @@ export default function Header() {
               <DropdownMenuSeparator />
               
               <DropdownMenuItem 
+                onClick={logout}
                 className="text-destructive focus:text-destructive"
                 data-testid="menu-logout"
               >
